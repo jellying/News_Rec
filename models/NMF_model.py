@@ -15,6 +15,10 @@ class NMF_model(basemodel):
         self.item_factors = self.nmf.components_
 
     def predict(self, user, item):
+<<<<<<< HEAD
+=======
+        """"""
+>>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
         u_f = self.user_factors[user, :]
         i_f = self.item_factors[:, item]
         prediction = np.matmul(u_f, i_f)

@@ -5,8 +5,13 @@ from scipy.sparse import csr_matrix
 class basemodel():
     def __init__(self, user_news_df):
         self.ui_df = user_news_df
+<<<<<<< HEAD
         self.USER_NUM = 10000 #10000  ml : 943
         self.ITEM_NUM = 6183 #6183  ml : 1682
+=======
+        self.USER_NUM = 10000
+        self.ITEM_NUM = 6183
+>>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
 
         self.ui_mat = self.get_mat(user_news_df)
 
@@ -72,8 +77,11 @@ class basemodel():
         nDCG /= user_sum
         print("Top%d Rec Result:" % topn)
         print("mPrecision: %g  mAP: %g  nDCG: %g" % (mPrecision, mAP, nDCG))
+<<<<<<< HEAD
         with open("ItemCBres.txt", 'w') as f:
             f.write("mPrecision: %g  mAP: %g  nDCG: %g" % (mPrecision, mAP, nDCG))
+=======
+>>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
 
 
     def cal_PN(self, predlist, reclist, n=10):

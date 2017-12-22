@@ -13,6 +13,7 @@ class userCF(basemodel):
         self.user_sim = cosine_similarity(self.ui_mat)
         self.knn = knn
 
+<<<<<<< HEAD
     def train(self):
         # 计算所有用户的K近邻用户,
         self.sorted_sim = np.argsort(-self.user_sim, axis=1)
@@ -43,3 +44,43 @@ class userCF(basemodel):
         else:
             prediction = prediction / sim_sum
         return prediction
+=======
+    def predict(self, user, item):
+        # 找出K近邻用户集
+        user_k = self.user_sim[user, :].argsort()[::-1]
+        user_k = user_k[1: self.knn + 1]
+        prediction = 0
+        sim_sum = 0
+        for uk in user_k:
+            sim_sum += self.user_sim[user, uk]
+            uki = self.ui_mat[uk, item]
+            prediction += self.user_sim[user, uk] * uki
+        prediction = prediction / sim_sum
+        return prediction
+
+    def predict_topK(self, user, K):
+        # 找出K近邻用户集
+        user_k = self.user_sim[user, :].argsort()[::-1]
+        user_k = user_k[1: self.knn + 1]
+        # user_rating = self.ui_mat.getrow(user)
+        user_rating = self.ui_mat[user, :]
+
+        rec_list = dict()
+        for item in range(self.ITEM_NUM):
+            # 对未评分的项目预测分数
+            if user_rating[item] == 0:
+                prediction = 0
+                sim_sum = 0.0
+                for uk in user_k:
+                    sim_sum += self.user_sim[user, uk]
+                    uki = self.ui_mat[uk, item]
+                    prediction += self.user_sim[user, uk] * uki
+                if sim_sum > 1e-8:
+                    prediction = prediction / sim_sum
+                else:
+                    prediction = 0
+                rec_list[item] = prediction
+        # 取topK个项目生成推荐列表
+        rec_topK = sorted(rec_list.items(), key=lambda e: e[1], reverse=True)
+        return [rec_topK[i][0] for i in range(K)]
+>>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce

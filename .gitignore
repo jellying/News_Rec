@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 Data/user_click_data.txt
 .idea/workspace.xml
 models/*.pyc
 Data/*.mat
+=======
+/Data/user_click_data.txt
+
+>>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
