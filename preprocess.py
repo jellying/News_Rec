@@ -5,7 +5,6 @@
 '''
 import pandas as pd
 import time
-<<<<<<< HEAD
 import re
 from gensim.models import ldamodel
 from gensim import corpora
@@ -16,8 +15,6 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-=======
->>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
 
 def statistic():
     data_df = pd.read_csv("Data/user_click_data.txt", sep='\t', header=-1)
@@ -93,10 +90,7 @@ def timestamp_datatime(value):
     dt = time.strftime(format, value)
     return dt
 
-<<<<<<< HEAD
 # 按时间分割测试集和训练集
-=======
->>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
 def split_data():
     data_df = pd.read_csv("Data/user_news_id.csv", header=-1, sep='\t')
     train_file = open("Data/train_data.txt", 'w', encoding='utf-8')
@@ -114,7 +108,6 @@ def split_data():
     train_file.close()
     test_file.close()
 
-<<<<<<< HEAD
 
 def get_delwords(path):
     '''获取需要剔除的词表'''
@@ -210,6 +203,3 @@ def cold_user():
 
 # gen_tfidf()
 extract_topic()
-=======
-split_data()
->>>>>>> 450b18c77e38ddb767749e30f4ce95135d9b2fce
