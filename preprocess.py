@@ -14,8 +14,10 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import jieba.posseg
+import json
 
-
+# 统计用户点击情况
 def statistic():
     data_df = pd.read_csv("Data/user_click_data.txt", sep='\t', header=-1)
     user_dict = dict()
@@ -123,13 +125,16 @@ def extract_topic():
     words_list = []
     for i in range(len(ctx_data)):
         news_ctx = str(ctx_data.iloc[i, 1]) + ' ' + str(ctx_data.iloc[i, 2])
-        news_words = list(jieba.cut(news_ctx))
+        news_words = list(jieba.posseg.cut(news_ctx))
         words = list()
-        for term in news_words:
+        for wrd in news_words:
+            term = wrd.word
+            flag = wrd.flag
             if term not in stop_set and term not in symbol_set:
                 isnum = re.match(r'([a-z0-9A-Z%\._]+)', term)
                 if isnum is None:
-                    words.append(term)
+                    if 'n' in flag or 'v' in flag:
+                        words.append(term)
         words_list.append(words)
 
     # 制作词典
@@ -151,14 +156,16 @@ def extract_topic():
     # 语料列表
     corpus_list = [word_dict.doc2bow(text) for text in words_list]
     # 构建lda模型
-    lda = ldamodel.LdaModel(corpus=corpus_list, id2word=word_dict, num_topics=50, alpha='auto', iterations=200)
+    lda = ldamodel.LdaModel(corpus=corpus_list, id2word=word_dict, num_topics=50, alpha='auto', iterations=1000)
     with open("Data/topic.txt", 'w', encoding='utf-8') as file:
         for topic in lda.show_topics(num_topics=50):
             file.write(str(topic[0]) + '\t' + ' '.join(get_dotcontent(topic[1])) + '\n')
     with open("Data/news_topic.txt", 'w', encoding='utf-8') as file:
+        topic_dict = dict()
         for n in range(len(corpus_list)):
             topic = lda.get_document_topics(corpus_list[n])
-            file.write("%d\t%s\n" %(n, str(topic)))
+            topic_dict[n] = topic
+        file.write(json.dumps(topic_dict))
     lda.save("trained_model/lda_model")
 
 # 将新闻内容生成tfidf矩阵, 直接计算并保存相似度矩阵
@@ -198,8 +205,42 @@ def cold_user():
         user_set.add(data_df.iloc[i, 0])
     for i in range(len(test_df)):
         test_set.add(test_df.iloc[i, 0])
+    cold_sum = 0
+    for user in test_set:
+        if user not in user_set:
+            cold_sum += 1
+    print("User Cold Sum: %d" % cold_sum)
 
+def gen_voc_content():
+    vocab_file = open("Data/vocab.txt", 'r', encoding='utf-8')
+    vocab = dict()
+    k = 1
+    for line in vocab_file:
+        seq = line.split('\t')
+        if len(seq) > 1:
+            word = seq[1]
+            if word not in vocab.keys():
+                vocab[word] = k
+                k += 1
+    vocab_file.close()
+    content_file = open("Data/news_context.txt", 'r', encoding='utf-8')
+    id_content_file = open("Data/news_context_id.txt", 'w', encoding='utf-8')
+    maxlen = 0
+    for line in content_file:
+        ctx_words = []
+        seq = line.split('\t')
+        news_id = seq[0]
+        news_ctx = seq[1] + ' ' + seq[2]
+        ctx_cut = jieba.cut(news_ctx)
+        for word in ' '.join(ctx_cut).split(' '):
+            if word in vocab.keys():
+                ctx_words.append(str(vocab[word]))
+        maxlen = max(len(ctx_words), maxlen)
+        if len(ctx_words) == 0:
+            ctx_words.append('0')
+        id_content_file.write(str(news_id) + '\t' + ' '.join(ctx_words) + '\n')
+    id_content_file.close()
+    content_file.close()
+    print("Maxlen: " + str(maxlen))
 
-
-# gen_tfidf()
-extract_topic()
+gen_tfidf()
